@@ -1,0 +1,63 @@
+<div class="ws-chat-container">
+  <h3>Chat with our AI</h3>
+  <textarea
+    id="ws-user-message"
+    placeholder="Type your question here (e.g., xyz)..."
+    rows="3"
+  ></textarea>
+  <button onclick="sendToWhatsApp()">Send to WhatsApp</button>
+</div>
+
+<script>
+  function sendToWhatsApp() {
+    const phoneNumber = "9779844616248";
+    const userMessage = document.getElementById("ws-user-message").value.trim();
+
+    if (!userMessage) {
+      alert("Please type a message first!");
+      return;
+    }
+
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(userMessage)}`;
+
+    console.log("WhatsApp URL:", whatsappUrl);
+    window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+  }
+</script>
+
+<style>
+  .ws-chat-container {
+    max-width: 350px;
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-family: Arial, sans-serif;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  .ws-chat-container h3 {
+    margin-top: 0;
+    color: #075e54;
+  }
+  .ws-chat-container textarea {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    resize: vertical;
+  }
+  .ws-chat-container button {
+    width: 100%;
+    background-color: #25d366;
+    color: white;
+    border: none;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+  .ws-chat-container button:hover {
+    background-color: #128c7e;
+  }
+</style>
