@@ -1,31 +1,15 @@
-<div class="ws-chat-container">
-  <h3>Chat with our AI</h3>
-  <textarea
-    id="ws-user-message"
-    placeholder="Type your question here (e.g., xyz)..."
-    rows="3"
-  ></textarea>
-  <button onclick="sendToWhatsApp()">Send to WhatsApp</button>
-</div>
-
-<script>
-  function sendToWhatsApp() {
-    const phoneNumber = "9779844616248";
-    const userMessage = document.getElementById("ws-user-message").value.trim();
-
-    if (!userMessage) {
-      alert("Please type a message first!");
-      return;
-    }
-
-    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(userMessage)}`;
-
-    console.log("WhatsApp URL:", whatsappUrl);
-    window.open(whatsappUrl, "_blank", "noopener,noreferrer");
-  }
-</script>
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>WhatsApp Chat Widget</title>
 <style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: transparent; /* so it blends into whatever page embeds it */
+  }
   .ws-chat-container {
     max-width: 350px;
     padding: 15px;
@@ -33,6 +17,11 @@
     border-radius: 8px;
     font-family: Arial, sans-serif;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+    background: #fff;
+  }
+  .ws-chat-container * {
+    box-sizing: border-box;
   }
   .ws-chat-container h3 {
     margin-top: 0;
@@ -41,10 +30,11 @@
   .ws-chat-container textarea {
     width: 100%;
     padding: 8px;
-    box-sizing: border-box;
     border: 1px solid #ccc;
     border-radius: 4px;
     resize: vertical;
+    font-family: inherit;
+    font-size: 14px;
   }
   .ws-chat-container button {
     width: 100%;
@@ -56,8 +46,81 @@
     border-radius: 4px;
     cursor: pointer;
     font-weight: bold;
+    font-size: 14px;
   }
   .ws-chat-container button:hover {
     background-color: #128c7e;
   }
+  .ws-chat-container button:disabled {
+    background-color: #9fd8bd;
+    cursor: not-allowed;
+  }
+  .ws-error {
+    color: #c0392b;
+    font-size: 12px;
+    margin-top: 6px;
+    display: none;
+  }
 </style>
+</head>
+<body>
+
+<div class="ws-chat-container">
+  <h3>Chat with our AI</h3>
+  <textarea
+    id="ws-user-message"
+    placeholder="Type your question here (e.g., xyz)..."
+    rows="3"
+  ></textarea>
+  <div class="ws-error" id="ws-error">Please type a message first!</div>
+  <button id="ws-send-btn" onclick="sendToWhatsApp()">Send to WhatsApp</button>
+</div>
+
+<script>
+  // --- Configurable phone number ---
+  // Priority order:
+  // 1. URL query param  ?phone=xxxxxxxxx
+  // 2. data-phone attribute on the embedding <iframe> (passed via query string, see note below)
+  // 3. Fallback default number
+  const DEFAULT_PHONE_NUMBER = "";
+
+  function getPhoneNumber() {
+    const params = new URLSearchParams(window.location.search);
+    const fromQuery = params.get("phone");
+    if (fromQuery && /^\d{7,15}$/.test(fromQuery)) {
+      return fromQuery;
+    }
+    return DEFAULT_PHONE_NUMBER;
+  }
+
+  function sendToWhatsApp() {
+    const phoneNumber = getPhoneNumber();
+    const messageBox = document.getElementById("ws-user-message");
+    const errorEl = document.getElementById("ws-error");
+    const userMessage = messageBox.value.trim();
+
+    if (!userMessage) {
+      errorEl.style.display = "block";
+      messageBox.focus();
+      return;
+    }
+    errorEl.style.display = "none";
+
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(userMessage)}`;
+
+    // Open in a new top-level tab/window (works even from inside an iframe,
+    // since target="_blank" style window.open breaks out of the frame).
+    window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+  }
+
+  // Optional: send on Enter (Shift+Enter for newline)
+  document.getElementById("ws-user-message").addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendToWhatsApp();
+    }
+  });
+</script>
+
+</body>
+</html>
