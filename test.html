@@ -10,14 +10,32 @@
     <link rel="stylesheet" href="" />
   </head>
   <body>
-    <iframe
-      src="https://rujit33.github.io/whatsapp-responder/?phone=9779844616248"
-      width="380"
-      height="500"
-      style="border: none"
-      title="WhatsApp Chat Widget"
-    >
-    </iframe>
+    <div class="ws-chat-container">
+      <iframe
+        src="https://rujit33.github.io/whatsapp-responder/?phone=9779844616248"
+        width="380"
+        height="500"
+        style="border: none"
+        title="WhatsApp Chat Widget"
+      >
+      </iframe>
+    </div>
+
+    <style>
+      .ws-chat-container {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 9999;
+      }
+
+      .ws-chat-container iframe {
+        display: block;
+        width: 380px;
+        height: 500px;
+        border: none;
+      }
+    </style>
 
     <!-- <iframe
       src="https://rujit33.github.io/whatsapp-responder/?phone=xxxxxxxxxxxx"
