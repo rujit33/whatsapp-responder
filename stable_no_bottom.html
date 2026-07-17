@@ -37,7 +37,7 @@
 
       /* ---------- Floating bubble ---------- */
       .ws-bubble {
-        position: fixed;
+        position: absolute;
         bottom: 16px;
         right: 16px;
         width: 56px;
@@ -48,26 +48,19 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        cursor: grab;
+        cursor: pointer;
         pointer-events: auto;
-        touch-action: none; /* let JS handle touch dragging instead of page scroll */
-        user-select: none;
-        -webkit-user-drag: none;
-        transition: box-shadow 0.15s ease;
+        transition:
+          transform 0.15s ease,
+          box-shadow 0.15s ease;
       }
-      .ws-bubble:hover:not(.ws-dragging) {
+      .ws-bubble:hover {
+        transform: scale(1.06);
         box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
-      }
-      .ws-bubble:active {
-        cursor: grabbing;
-      }
-      .ws-bubble.ws-dragging {
-        transition: none;
       }
       .ws-bubble svg {
         width: 30px;
         height: 30px;
-        pointer-events: none;
       }
       .ws-bubble.ws-hidden {
         display: none;
@@ -268,7 +261,7 @@
   <body>
     <div class="ws-widget" id="ws-widget">
       <!-- Bubble launcher -->
-      <div class="ws-bubble" id="ws-bubble">
+      <div class="ws-bubble" id="ws-bubble" onclick="ws_openPanel()">
         <span class="ws-ping" id="ws-ping"></span>
         <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path
@@ -384,111 +377,6 @@
         document.getElementById("ws-ping").style.display = "none";
         document.getElementById("ws-user-message").focus();
       }
-
-      // ---------------------------------------------------------------
-      // Draggable bubble
-      // Works with mouse and touch via Pointer Events. A pointerup with
-      // very little total movement is treated as a click (opens the
-      // panel); anything past the threshold is treated as a drag.
-      // ---------------------------------------------------------------
-      (function ws_enableDrag() {
-        const bubble = document.getElementById("ws-bubble");
-        const DRAG_THRESHOLD = 6; // px of movement before it counts as a drag
-        const MARGIN = 8; // keep bubble at least this far from viewport edges
-
-        let startX = 0,
-          startY = 0;
-        let originLeft = 0,
-          originTop = 0;
-        let dragging = false;
-        let moved = false;
-
-        function currentBubbleRect() {
-          return bubble.getBoundingClientRect();
-        }
-
-        function onPointerDown(e) {
-          const rect = currentBubbleRect();
-          // Switch from bottom/right anchoring to explicit left/top so it can be dragged freely
-          bubble.style.left = rect.left + "px";
-          bubble.style.top = rect.top + "px";
-          bubble.style.right = "auto";
-          bubble.style.bottom = "auto";
-
-          startX = e.clientX;
-          startY = e.clientY;
-          originLeft = rect.left;
-          originTop = rect.top;
-          dragging = true;
-          moved = false;
-
-          bubble.setPointerCapture(e.pointerId);
-          bubble.classList.add("ws-dragging");
-        }
-
-        function onPointerMove(e) {
-          if (!dragging) return;
-          const dx = e.clientX - startX;
-          const dy = e.clientY - startY;
-
-          if (Math.abs(dx) > DRAG_THRESHOLD || Math.abs(dy) > DRAG_THRESHOLD) {
-            moved = true;
-          }
-          if (!moved) return;
-
-          const w = window.innerWidth;
-          const h = window.innerHeight;
-          const size = bubble.offsetWidth;
-
-          let newLeft = originLeft + dx;
-          let newTop = originTop + dy;
-
-          // Clamp within viewport bounds
-          newLeft = Math.min(Math.max(newLeft, MARGIN), w - size - MARGIN);
-          newTop = Math.min(Math.max(newTop, MARGIN), h - size - MARGIN);
-
-          bubble.style.left = newLeft + "px";
-          bubble.style.top = newTop + "px";
-        }
-
-        function onPointerUp(e) {
-          if (!dragging) return;
-          dragging = false;
-          bubble.classList.remove("ws-dragging");
-          try {
-            bubble.releasePointerCapture(e.pointerId);
-          } catch (err) {}
-
-          if (!moved) {
-            // Treat as a click/tap
-            ws_openPanel();
-          }
-        }
-
-        bubble.addEventListener("pointerdown", onPointerDown);
-        bubble.addEventListener("pointermove", onPointerMove);
-        bubble.addEventListener("pointerup", onPointerUp);
-        bubble.addEventListener("pointercancel", onPointerUp);
-
-        // Keep bubble on-screen if the viewport is resized after dragging
-        window.addEventListener("resize", function () {
-          if (bubble.style.left === "" || bubble.style.left === "auto") return;
-          const w = window.innerWidth;
-          const h = window.innerHeight;
-          const size = bubble.offsetWidth;
-          const rect = currentBubbleRect();
-          const clampedLeft = Math.min(
-            Math.max(rect.left, MARGIN),
-            w - size - MARGIN,
-          );
-          const clampedTop = Math.min(
-            Math.max(rect.top, MARGIN),
-            h - size - MARGIN,
-          );
-          bubble.style.left = clampedLeft + "px";
-          bubble.style.top = clampedTop + "px";
-        });
-      })();
 
       function ws_closePanel() {
         document.getElementById("ws-panel").classList.remove("ws-open");
